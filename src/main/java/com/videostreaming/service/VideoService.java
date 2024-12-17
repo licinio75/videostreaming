@@ -8,8 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.core.sync.RequestBody;
 
-import java.nio.file.Paths;
+
 import java.util.UUID;
 
 @Service
@@ -29,10 +30,13 @@ public class VideoService {
         String fileUrl = bucketName + "/" + uniqueFileName;
 
         // Subir el archivo a MinIO
-        s3Client.putObject(PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(uniqueFileName)
-                .build(), Paths.get(file.getOriginalFilename()));
+        s3Client.putObject(
+            PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(uniqueFileName)
+                    .build(),
+            RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+    );
 
         // Guardar los metadatos en la base de datos
         Video video = new Video();
